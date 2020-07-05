@@ -5,7 +5,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import sys
-from unicodedata import east_asian_width
+from unicodedata import east_asian_width, normalize, combining
 
 from ranger import PY3
 
@@ -53,6 +53,20 @@ def string_to_charlist(string):
             if east_asian_width(char) in WIDE_SYMBOLS:
                 result.append('')
     return result
+
+
+def normalize_to_nfc(string):
+    """Return NFD normalized string"""
+    if PY3:
+        return normalize('NFC', string)
+    return normalize('NFC', string.decode('utf-8', 'ignore')).encode('utf-8')
+
+
+def is_combining(char):
+    """Return if char is NFD combining character"""
+    if PY3:
+        return combining(char) != 0
+    return combining(char.decode('utf-8', 'ignore')) != 0
 
 
 class WideString(object):  # pylint: disable=too-few-public-methods

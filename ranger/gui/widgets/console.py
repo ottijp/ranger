@@ -12,7 +12,7 @@ from collections import deque
 
 from ranger.gui.widgets import Widget
 from ranger.ext.direction import Direction
-from ranger.ext.widestring import uwid, WideString
+from ranger.ext.widestring import uwid, WideString, normalize_to_nfc, is_combining
 from ranger.container.history import History, HistoryEmptyException
 import ranger
 
@@ -245,7 +245,12 @@ class Console(Widget):  # pylint: disable=too-many-instance-attributes,too-many-
                         line += decoded
                     else:
                         line = line[:pos] + decoded + line[pos:]
-                    pos += len(decoded)
+                    if is_combining(decoded):
+                        # combining character will be normalized to one character
+                        # no need to increase pos
+                        line = normalize_to_nfc(line)
+                    else:
+                        pos += len(decoded)
         else:
             if pos == len(line):
                 line += key
